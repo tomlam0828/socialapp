@@ -43,3 +43,16 @@
     color: #fff;
     text-decoration: none;
 }
+
+#welcome {
+    color: yellow;
+}
+
+h1 {
+    text-align: center;
+}
+
+#main {
+    margin-top: 60px;
+    margin-bottom: 50px;
+}
