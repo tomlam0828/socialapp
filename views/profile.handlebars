@@ -10,8 +10,35 @@
         </div>
         <div class="col-sm-4">
             <h1>Profile</h1>
-            <p class="card-text"><i class="fa fa-user"></i>Email: {{user.fullname}}</p>
-            <p class="card-text"><i class="fa fa-envelope"></i>Email: {{user.email}}</p>
+            <p class="card-text"><i class="fa fa-user"></i> Email: {{user.fullname}}</p>
+            {{#if user.email}}
+            <p class="card-text"><i class="fa fa-envelope"></i> Email: {{user.email}}</p>
+            {{else}}
+            <form action="/addEmail" method="POST">
+                <input type="text" name="email" class="form-control" placeholder="Enter email address">
+                <button type="submit" class="btn btn-danger">Save</button>
+            </form>
+            {{/if}}
+            {{#if user.phone}}
+            <p class="card-text"><i class="fa fa-phone"></i> {{user.phone}}</p>
+            {{else}}
+            <form class="form-inline" action="/addPhone" method="POST">
+                <div class="form-group mx-sm-3 mb-2">
+                    <input type="number" name="phone" class="form-control" placeholder="Enter phone number" required>
+                </div>
+                <button type="submit" class="btn btn-primary mb-2"><i class="fa fa-check"> </i></button>
+            </form>
+            {{/if}}
+            {{#if user.location}}
+            <p class="card-text"><i class="fa fa-map-marker"></i> {{user.location}}</p>
+            {{else}}
+            <form class="form-inline" action="/addLocation" method="POST">
+                <div class="form-group mx-sm-3 mb-2">
+                    <input type="text" name="location" class="form-control" placeholder="Enter your location" required>
+                </div>
+                <button type="submit" class="btn btn-primary mb-2"><i class="fa fa-check"> </i></button>
+            </form>
+            {{/if}}
         </div>
     </div>
 </div>

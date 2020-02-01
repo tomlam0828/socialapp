@@ -14,6 +14,11 @@ const keys = require('./config/keys');
 // link passport
 require('./passport/google-passport');
 require('./passport/facebook-passport');
+//link helper
+const {
+    ensureAuth,
+    ensureGuest
+} = require('./helper/auth');
 
 const mongoose = require('mongoose');
 const passport = require('passport');
@@ -54,7 +59,7 @@ app.set('view engine', 'handlebars');
 app.use(express.static('public'));
 
 // handle routes
-app.get('/', (req, res) => {
+app.get('/', ensureGuest, (req, res) => {
     res.render('home');
 });
 
@@ -82,7 +87,7 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
 });
 
 //handle profile route
-app.get('/profile', (req, res) => {
+app.get('/profile', ensureAuth, (req, res) => {
     User.findById({ _id: req.user._id }).then((user) => {
         res.render('profile', {
             user: user
@@ -90,6 +95,38 @@ app.get('/profile', (req, res) => {
     })
 });
 
+//handle email route
+app.post('/addEmail', (req, res) => {
+    const email = req.body.email;
+    User.findById({ _id: req.user._id }).then((user) => {
+        user.email = email;
+        user.save().then(() => {
+            res.redirect('/profile');
+        });
+    });
+});
+
+//handle phone route
+app.post('/addPhone', (req, res) => {
+    const phone = req.body.phone;
+    User.findById({ _id: req.user._id }).then((user) => {
+        user.phone = phone;
+        user.save().then(() => {
+            res.redirect('/profile');
+        });
+    });
+});
+
+//handle location route
+app.post('/addLocation', (req, res) => {
+    const location = req.body.location;
+    User.findById({ _id: req.user._id }).then((user) => {
+        user.location = location;
+        user.save().then(() => {
+            res.redirect('/profile');
+        });
+    });
+});
 //user logout
 app.get('/logout', (req, res) => {
     req.logout();
