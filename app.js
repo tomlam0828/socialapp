@@ -6,7 +6,10 @@ const exphbs = require('express-handlebars');
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+
+//load models
 const User = require('./models/user');
+const Post = require('./models/post');
 
 
 // connect to MongoURI exported from external file
@@ -95,6 +98,15 @@ app.get('/profile', ensureAuth, (req, res) => {
     })
 });
 
+//handle route for all users
+app.get('/users', ensureAuth, (req, res) => {
+    User.find({}).then((users) => {
+        res.render('users', {
+            users: users
+        });
+    });
+});
+
 //handle email route
 app.post('/addEmail', (req, res) => {
     const email = req.body.email;
@@ -117,6 +129,15 @@ app.post('/addPhone', (req, res) => {
     });
 });
 
+//display one user
+app.get('/user/:id', (req, res) => {
+    User.findById({ _id: req.params.id }).then((user) => {
+        res.render('user', {
+            user: user
+        });
+    });
+});
+
 //handle location route
 app.post('/addLocation', (req, res) => {
     const location = req.body.location;
@@ -127,12 +148,47 @@ app.post('/addLocation', (req, res) => {
         });
     });
 });
+
+//handle post route
+app.get('/addPost', (req, res) => {
+    res.render('addPost');
+});
+
+//handle comment route
+app.post('/savePost', ensureAuth, (req, res) => {
+    var allowComments;
+    if (req.body.allowComments) {
+        allowComments = true;
+    } else {
+        allowComments = false;
+    }
+    const newPost = {
+        title: req.body.title,
+        body: req.body.body,
+        status: req.body.status,
+        allowComments: allowComments,
+        user: req.user._id
+    }
+    new Post(newPost).save().then(() => {
+        res.redirect('/posts');
+    });
+});
+
+//handle posts route
+app.get('/posts', (req, res) => {
+    Post.find({ status: 'public' }).populate('user').sort({ date: 'desc' }).then((posts) => {
+        res.render('publicPosts', {
+            posts: posts
+        });
+    });
+});
+
 //user logout
 app.get('/logout', (req, res) => {
     req.logout();
     res.redirect('/');
-})
+});
 
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
-})
+});
