@@ -8,9 +8,13 @@ const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const User = require('./models/user');
 
+
 // connect to MongoURI exported from external file
 const keys = require('./config/keys');
+// link passport
 require('./passport/google-passport');
+require('./passport/facebook-passport');
+
 const mongoose = require('mongoose');
 const passport = require('passport');
 // express config
@@ -59,21 +63,25 @@ app.get('/about', (req, res) => {
 })
 
 // google auth route
-app.get('/auth/google',
-    passport.authenticate('google', {
-        scope:
-            ['profile', 'email']
-    }
-    ));
+app.get('/auth/google', passport.authenticate('google',
+    { scope: ['profile', 'email'] }
+));
 
-app.get('/auth/google/callback',
-    passport.authenticate('google', {
-        failureRedirect: '/'
-    }),
-    (req, res) => {
-        res.redirect('/profile');
-    });
+app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
+    res.redirect('/profile');
+});
 
+//facebook route
+app.get('/auth/facebook',
+    passport.authenticate('facebook', {
+        scope: ['email']
+    }));
+
+app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/' }), (req, res) => {
+    res.redirect('/profile');
+});
+
+//handle profile route
 app.get('/profile', (req, res) => {
     User.findById({ _id: req.user._id }).then((user) => {
         res.render('profile', {
