@@ -2,19 +2,18 @@
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
+const keys = require('./config/keys');
 const exphbs = require('express-handlebars');
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
 const methodOverride = require('method-override');
+const stripe = require('stripe')(keys.StripeSecretKey);
 
 //load models
 const User = require('./models/user');
 const Post = require('./models/post');
 
-
-// connect to MongoURI exported from external file
-const keys = require('./config/keys');
 // link passport
 require('./passport/google-passport');
 require('./passport/facebook-passport');
@@ -93,9 +92,23 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
 
 //handle profile route
 app.get('/profile', ensureAuth, (req, res) => {
-    Post.find({ user: req.user._id }).populate('user').sort({date: 'desc'}).then((posts) => {
+    Post.find({ user: req.user._id }).populate('user').sort({ date: 'desc' }).then((posts) => {
         res.render('profile', {
             posts: posts
+        });
+    });
+});
+
+//handle comment to db
+app.post('/addComment/:id', (req, res) => {
+    Post.findOne({ _id: req.params.id }).then((post) => {
+        const comment = {
+            commentBody: req.body.commentBody,
+            commentUser: req.user._id
+        }
+        post.comments.push(comment);
+        post.save().then(() => {
+            res.redirect('/posts');
         });
     });
 });
@@ -153,8 +166,36 @@ app.post('/addLocation', (req, res) => {
 
 //handle post route
 app.get('/addPost', (req, res) => {
-    res.render('addPost');
+    res.render('payment', {
+        StripePublishKey: keys.StripePublishKey
+    });
+    // res.render('addPost');
 });
+
+//handle payment route
+app.post('/payment', (req, res) => {
+    const amount = 199;
+    stripe.customers.create({
+        email: req.body.stripeEmail,
+        source: req.body.stripeToken,
+    }).then((customer) => {
+        stripe.charges.create({
+            amount: amount,
+            currency: 'usd',
+            description: '$1.99 for a post!',
+            customer: customer.id
+        }).then((charge) => {
+            res.render('success', {
+                charge: charge
+            });
+        });
+    });
+});
+
+//handle redirect route to display
+app.get('/display', (req, res) => {
+    res.render('addPost');
+})
 
 //handle comment route
 app.post('/savePost', (req, res) => {
@@ -176,16 +217,25 @@ app.post('/savePost', (req, res) => {
     });
 });
 
+//display single user
+app.get('/showposts/:id', (req, res) => {
+    Post.find({ user: req.params.id, status: 'public' }).populate('user').sort({ date: 'desc' }).then((posts) => {
+        res.render('showUserPosts', {
+            posts: posts
+        });
+    });
+});
+
 //handle delete route
 app.delete('/:id', (req, res) => {
-    Post.remove({_id: req.params.id}).then(() => {
+    Post.remove({ _id: req.params.id }).then(() => {
         res.redirect('/profile');
     });
 });
 
 // handle edit route
 app.get('/editPost/:id', (req, res) => {
-    Post.findOne({_id: req.params.id}).then((post) => {
+    Post.findOne({ _id: req.params.id }).then((post) => {
         res.render('editingPost', {
             post: post
         });
@@ -194,7 +244,7 @@ app.get('/editPost/:id', (req, res) => {
 
 //handle posts route
 app.get('/posts', (req, res) => {
-    Post.find({ status: 'public' }).populate('user').sort({ date: 'desc' }).then((posts) => {
+    Post.find({ status: 'public' }).populate('user').populate('comments.commentUser').sort({ date: 'desc' }).then((posts) => {
         res.render('publicPosts', {
             posts: posts
         });
@@ -203,7 +253,7 @@ app.get('/posts', (req, res) => {
 
 //handle put route
 app.put('/editingPost/:id', (req, res) => {
-    Post.findOne({_id: req.params.id}).then((post) => {
+    Post.findOne({ _id: req.params.id }).then((post) => {
         var allowComments;
         if (req.body.allowComments) {
             allowComments = true;

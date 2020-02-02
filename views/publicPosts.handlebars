@@ -1,18 +1,34 @@
 <div class="container">
     {{#each posts}}
     <div class="media">
-        <img class="mr-3 post-user-pic" src="{{user.image}}">
+        <a href="/showposts/{{user._id}}"><img class="mr-3 post-user-pic" src="{{user.image}}"></a>
         <div class="media-body">
-            <h3 class="mt-0">{{user.fullname}}</h3>
+            <a href="/showposts/{{user._id}}">
+                <h3 class="mt-0">{{user.fullname}}</h3>
+            </a>
             <h4>{{title}} <small><i class="fa fa-globe"></i></small></h4>
             <p>{{body}}</p>
             <small>{{date}}</small>
             <br>
             {{#if allowComments}}
+            {{#each comments}}
+            <div class="media mt-3">
+                <a class="pr-3" href="/showposts/{{commentUser._id}}">
+                    <img id="user-comment-icon" src="{{commentUser.image}}">
+                </a>
+                <div class="media-body">
+                    <a href="/showposts/{{commentUser._id}}">
+                        <h5 class="mt-0">{{commentUser.fullname}}</h5>
+                    </a>
+                    <p>{{commentBody}}</p>
+                    <small>{{commentDate}}</small>
+                </div>
+            </div>
+            {{/each}}
             <br>
             <form action="/addComment/{{_id}}" method="POST" class="form-inline">
                 <div class="form-group mx-sm-3 mb-2">
-                    <input type="text" class="form-control" placeholder="Leave your comment">
+                    <input type="text" class="form-control" name="commentBody" placeholder="Leave your comment">
                 </div>
                 <button type="submit" class="btn btn-primary mb-2"><i class="fa fa-comment"></i></button>
             </form>
