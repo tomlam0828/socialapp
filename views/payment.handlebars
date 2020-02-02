@@ -1,8 +1,15 @@
 <div class="container">
     <div class="row">
-        <div class="col-sm-4">
-            <h1>Please make a payment!</h1>
+        <div class="col"></div>
+        <div class="col-6">
+            <h2 style="text-align: center;">Please make a payment!</h2>
             <p style="text-align: center;">Please pay $1.99 to make a post!</p>
+            <small>This application is currently under the testing mode, please fill out with 4242-4242-4242-4242 as a
+                credit card number and any further expiration date.
+            </small>
+            <p style="color: red;">PLEASE DO NOT FILL OUT THE REAL CREDIT CARD INFORMATION BECAUSE I CANNOT RECEIVE THE
+                MONEY!!!
+            </p>
             <br>
             <form action="/payment" method="POST">
                 <script src="https://checkout.stripe.com/checkout.js" class="stripe-button"
@@ -14,5 +21,6 @@
                 <button id="checkout-button">Pay</button> --}}
             </form>
         </div>
+        <div class="col"></div>
     </div>
 </div>

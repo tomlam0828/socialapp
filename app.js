@@ -67,7 +67,7 @@ app.get('/', ensureGuest, (req, res) => {
     res.render('home');
 });
 
-app.get('/about', (req, res) => {
+app.get('/about', ensureAuth, (req, res) => {
     res.render('about');
 })
 
@@ -100,7 +100,7 @@ app.get('/profile', ensureAuth, (req, res) => {
 });
 
 //handle comment to db
-app.post('/addComment/:id', (req, res) => {
+app.post('/addComment/:id', ensureAuth, (req, res) => {
     Post.findOne({ _id: req.params.id }).then((post) => {
         const comment = {
             commentBody: req.body.commentBody,
@@ -123,7 +123,7 @@ app.get('/users', ensureAuth, (req, res) => {
 });
 
 //handle email route
-app.post('/addEmail', (req, res) => {
+app.post('/addEmail', ensureAuth, (req, res) => {
     const email = req.body.email;
     User.findById({ _id: req.user._id }).then((user) => {
         user.email = email;
@@ -134,7 +134,7 @@ app.post('/addEmail', (req, res) => {
 });
 
 //handle phone route
-app.post('/addPhone', (req, res) => {
+app.post('/addPhone', ensureAuth, (req, res) => {
     const phone = req.body.phone;
     User.findById({ _id: req.user._id }).then((user) => {
         user.phone = phone;
@@ -145,7 +145,7 @@ app.post('/addPhone', (req, res) => {
 });
 
 //display one user
-app.get('/user/:id', (req, res) => {
+app.get('/user/:id', ensureAuth, (req, res) => {
     User.findById({ _id: req.params.id }).then((user) => {
         res.render('user', {
             user: user
@@ -154,7 +154,7 @@ app.get('/user/:id', (req, res) => {
 });
 
 //handle location route
-app.post('/addLocation', (req, res) => {
+app.post('/addLocation', ensureAuth, (req, res) => {
     const location = req.body.location;
     User.findById({ _id: req.user._id }).then((user) => {
         user.location = location;
@@ -165,7 +165,7 @@ app.post('/addLocation', (req, res) => {
 });
 
 //handle post route
-app.get('/addPost', (req, res) => {
+app.get('/addPost', ensureAuth, (req, res) => {
     res.render('payment', {
         StripePublishKey: keys.StripePublishKey
     });
@@ -173,7 +173,7 @@ app.get('/addPost', (req, res) => {
 });
 
 //handle payment route
-app.post('/payment', (req, res) => {
+app.post('/payment', ensureAuth, (req, res) => {
     const amount = 199;
     stripe.customers.create({
         email: req.body.stripeEmail,
@@ -193,12 +193,12 @@ app.post('/payment', (req, res) => {
 });
 
 //handle redirect route to display
-app.get('/display', (req, res) => {
+app.get('/display', ensureAuth, (req, res) => {
     res.render('addPost');
 })
 
 //handle comment route
-app.post('/savePost', (req, res) => {
+app.post('/savePost', ensureAuth, (req, res) => {
     var allowComments;
     if (req.body.allowComments) {
         allowComments = true;
@@ -218,7 +218,7 @@ app.post('/savePost', (req, res) => {
 });
 
 //display single user
-app.get('/showposts/:id', (req, res) => {
+app.get('/showposts/:id', ensureAuth, (req, res) => {
     Post.find({ user: req.params.id, status: 'public' }).populate('user').sort({ date: 'desc' }).then((posts) => {
         res.render('showUserPosts', {
             posts: posts
@@ -227,14 +227,14 @@ app.get('/showposts/:id', (req, res) => {
 });
 
 //handle delete route
-app.delete('/:id', (req, res) => {
+app.delete('/:id', ensureAuth, (req, res) => {
     Post.remove({ _id: req.params.id }).then(() => {
         res.redirect('/profile');
     });
 });
 
 // handle edit route
-app.get('/editPost/:id', (req, res) => {
+app.get('/editPost/:id', ensureAuth, (req, res) => {
     Post.findOne({ _id: req.params.id }).then((post) => {
         res.render('editingPost', {
             post: post
@@ -243,7 +243,7 @@ app.get('/editPost/:id', (req, res) => {
 });
 
 //handle posts route
-app.get('/posts', (req, res) => {
+app.get('/posts', ensureAuth, (req, res) => {
     Post.find({ status: 'public' }).populate('user').populate('comments.commentUser').sort({ date: 'desc' }).then((posts) => {
         res.render('publicPosts', {
             posts: posts
@@ -252,7 +252,7 @@ app.get('/posts', (req, res) => {
 });
 
 //handle put route
-app.put('/editingPost/:id', (req, res) => {
+app.put('/editingPost/:id', ensureAuth, (req, res) => {
     Post.findOne({ _id: req.params.id }).then((post) => {
         var allowComments;
         if (req.body.allowComments) {

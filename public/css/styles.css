@@ -52,6 +52,8 @@ h1 {
 #main {
     margin-top: 60px;
     margin-bottom: 50px;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 16px;
 }
 
 .col-sm-4 {
@@ -83,4 +85,16 @@ h1 {
 
 .user-display {
     text-align: center;
+}
+
+#success {
+    text-align: center;
+}
+
+.card-img {
+    border-radius: 100px;
+}
+
+.footer-font {
+    font-size: 13px;
 }
