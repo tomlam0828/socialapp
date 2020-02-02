@@ -6,6 +6,7 @@ const exphbs = require('express-handlebars');
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const methodOverride = require('method-override');
 
 //load models
 const User = require('./models/user');
@@ -36,6 +37,7 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(methodOverride('_method'));
 
 // connect to database
 mongoose.connect(keys.MongoURI, {
@@ -91,11 +93,11 @@ app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRe
 
 //handle profile route
 app.get('/profile', ensureAuth, (req, res) => {
-    User.findById({ _id: req.user._id }).then((user) => {
+    Post.find({ user: req.user._id }).populate('user').sort({date: 'desc'}).then((posts) => {
         res.render('profile', {
-            user: user
+            posts: posts
         });
-    })
+    });
 });
 
 //handle route for all users
@@ -155,7 +157,7 @@ app.get('/addPost', (req, res) => {
 });
 
 //handle comment route
-app.post('/savePost', ensureAuth, (req, res) => {
+app.post('/savePost', (req, res) => {
     var allowComments;
     if (req.body.allowComments) {
         allowComments = true;
@@ -174,11 +176,46 @@ app.post('/savePost', ensureAuth, (req, res) => {
     });
 });
 
+//handle delete route
+app.delete('/:id', (req, res) => {
+    Post.remove({_id: req.params.id}).then(() => {
+        res.redirect('/profile');
+    });
+});
+
+// handle edit route
+app.get('/editPost/:id', (req, res) => {
+    Post.findOne({_id: req.params.id}).then((post) => {
+        res.render('editingPost', {
+            post: post
+        });
+    });
+});
+
 //handle posts route
 app.get('/posts', (req, res) => {
     Post.find({ status: 'public' }).populate('user').sort({ date: 'desc' }).then((posts) => {
         res.render('publicPosts', {
             posts: posts
+        });
+    });
+});
+
+//handle put route
+app.put('/editingPost/:id', (req, res) => {
+    Post.findOne({_id: req.params.id}).then((post) => {
+        var allowComments;
+        if (req.body.allowComments) {
+            allowComments = true;
+        } else {
+            allowComments = false;
+        }
+        post.title = req.body.title;
+        post.body = req.body.body;
+        post.status = req.body.status;
+        post.allowComments = allowComments;
+        post.save().then(() => {
+            res.redirect('/profile');
         });
     });
 });

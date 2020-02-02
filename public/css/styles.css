@@ -64,3 +64,12 @@ h1 {
 #address {
     color: red;
 }
+
+.post-user-pic {
+    width: 100px;
+    height: auto;
+}
+
+.red {
+    color: green;
+}
