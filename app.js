@@ -27,7 +27,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 // express config
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(session({
     secret: 'keyboard cat',
@@ -67,16 +67,16 @@ app.get('/', ensureGuest, (req, res) => {
     res.render('home');
 });
 
-app.get('/about', ensureAuth, (req, res) => {
+app.get('/about', (req, res) => {
     res.render('about');
 })
 
 // google auth route
 app.get('/auth/google', passport.authenticate('google',
-    { scope: ['profile', 'email'] }
+    {scope: ['profile', 'email']}
 ));
 
-app.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: '/' }), (req, res) => {
+app.get('/auth/google/callback', passport.authenticate('google', {failureRedirect: '/'}), (req, res) => {
     res.redirect('/profile');
 });
 
@@ -86,13 +86,13 @@ app.get('/auth/facebook',
         scope: ['email']
     }));
 
-app.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/' }), (req, res) => {
+app.get('/auth/facebook/callback', passport.authenticate('facebook', {failureRedirect: '/'}), (req, res) => {
     res.redirect('/profile');
 });
 
 //handle profile route
 app.get('/profile', ensureAuth, (req, res) => {
-    Post.find({ user: req.user._id }).populate('user').sort({ date: 'desc' }).then((posts) => {
+    Post.find({user: req.user._id}).populate('user').sort({date: 'desc'}).then((posts) => {
         res.render('profile', {
             posts: posts
         });
@@ -101,7 +101,7 @@ app.get('/profile', ensureAuth, (req, res) => {
 
 //handle comment to db
 app.post('/addComment/:id', ensureAuth, (req, res) => {
-    Post.findOne({ _id: req.params.id }).then((post) => {
+    Post.findOne({_id: req.params.id}).then((post) => {
         const comment = {
             commentBody: req.body.commentBody,
             commentUser: req.user._id
@@ -125,7 +125,7 @@ app.get('/users', ensureAuth, (req, res) => {
 //handle email route
 app.post('/addEmail', ensureAuth, (req, res) => {
     const email = req.body.email;
-    User.findById({ _id: req.user._id }).then((user) => {
+    User.findById({_id: req.user._id}).then((user) => {
         user.email = email;
         user.save().then(() => {
             res.redirect('/profile');
@@ -136,7 +136,7 @@ app.post('/addEmail', ensureAuth, (req, res) => {
 //handle phone route
 app.post('/addPhone', ensureAuth, (req, res) => {
     const phone = req.body.phone;
-    User.findById({ _id: req.user._id }).then((user) => {
+    User.findById({_id: req.user._id}).then((user) => {
         user.phone = phone;
         user.save().then(() => {
             res.redirect('/profile');
@@ -146,7 +146,7 @@ app.post('/addPhone', ensureAuth, (req, res) => {
 
 //display one user
 app.get('/user/:id', ensureAuth, (req, res) => {
-    User.findById({ _id: req.params.id }).then((user) => {
+    User.findById({_id: req.params.id}).then((user) => {
         res.render('user', {
             user: user
         });
@@ -156,7 +156,7 @@ app.get('/user/:id', ensureAuth, (req, res) => {
 //handle location route
 app.post('/addLocation', ensureAuth, (req, res) => {
     const location = req.body.location;
-    User.findById({ _id: req.user._id }).then((user) => {
+    User.findById({_id: req.user._id}).then((user) => {
         user.location = location;
         user.save().then(() => {
             res.redirect('/profile');
@@ -219,7 +219,7 @@ app.post('/savePost', ensureAuth, (req, res) => {
 
 //display single user
 app.get('/showposts/:id', ensureAuth, (req, res) => {
-    Post.find({ user: req.params.id, status: 'public' }).populate('user').sort({ date: 'desc' }).then((posts) => {
+    Post.find({user: req.params.id, status: 'public'}).populate('user').sort({date: 'desc'}).then((posts) => {
         res.render('showUserPosts', {
             posts: posts
         });
@@ -228,14 +228,14 @@ app.get('/showposts/:id', ensureAuth, (req, res) => {
 
 //handle delete route
 app.delete('/:id', ensureAuth, (req, res) => {
-    Post.remove({ _id: req.params.id }).then(() => {
+    Post.remove({_id: req.params.id}).then(() => {
         res.redirect('/profile');
     });
 });
 
 // handle edit route
 app.get('/editPost/:id', ensureAuth, (req, res) => {
-    Post.findOne({ _id: req.params.id }).then((post) => {
+    Post.findOne({_id: req.params.id}).then((post) => {
         res.render('editingPost', {
             post: post
         });
@@ -244,7 +244,7 @@ app.get('/editPost/:id', ensureAuth, (req, res) => {
 
 //handle posts route
 app.get('/posts', ensureAuth, (req, res) => {
-    Post.find({ status: 'public' }).populate('user').populate('comments.commentUser').sort({ date: 'desc' }).then((posts) => {
+    Post.find({status: 'public'}).populate('user').populate('comments.commentUser').sort({date: 'desc'}).then((posts) => {
         res.render('publicPosts', {
             posts: posts
         });
@@ -253,7 +253,7 @@ app.get('/posts', ensureAuth, (req, res) => {
 
 //handle put route
 app.put('/editingPost/:id', ensureAuth, (req, res) => {
-    Post.findOne({ _id: req.params.id }).then((post) => {
+    Post.findOne({_id: req.params.id}).then((post) => {
         var allowComments;
         if (req.body.allowComments) {
             allowComments = true;

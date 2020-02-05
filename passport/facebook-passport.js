@@ -4,12 +4,12 @@ const User = require('../models/user');
 const FacebookStrategy = require('passport-facebook').Strategy;
 
 passport.use(new FacebookStrategy({
-    clientID: keys.FacebookClientID,
-    clientSecret: keys.FacebookClientSecret,
-    callbackURL: "/auth/facebook/callback",
-    profileFields: ['id', 'name', 'photos', 'email', 'displayName'],
-    proxy: true
-},
+        clientID: keys.FacebookClientID,
+        clientSecret: keys.FacebookClientSecret,
+        callbackURL: "/auth/facebook/callback",
+        profileFields: ['id', 'name', 'photos', 'email', 'displayName'],
+        proxy: true
+    },
     function (accessToken, refreshToken, profile, done) {
         console.log(profile.emails[0].value);
         User.findOne({facebook: profile.id}).then((user) => {

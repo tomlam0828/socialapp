@@ -14,11 +14,11 @@ passport.deserializeUser(function (id, done) {
 });
 
 passport.use(new GoogleStrategy({
-    clientID: keys.GoogleClientID,
-    clientSecret: keys.GoogleClientSecret,
-    callbackURL: "/auth/google/callback",
-    proxy: true
-},
+        clientID: keys.GoogleClientID,
+        clientSecret: keys.GoogleClientSecret,
+        callbackURL: "/auth/google/callback",
+        proxy: true
+    },
     (request, accessToken, refreshToken, profile, done) => {
         console.log(profile)
         User.findOne({
@@ -37,9 +37,9 @@ passport.use(new GoogleStrategy({
                 }
                 // save new user into database
                 new User(newUser).save()
-                .then((user) => {
-                    done(null, user);
-                })
+                    .then((user) => {
+                        done(null, user);
+                    })
             }
         })
     }

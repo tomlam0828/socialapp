@@ -98,3 +98,7 @@ h1 {
 .footer-font {
     font-size: 13px;
 }
+
+#about {
+    text-align: center;
+}
